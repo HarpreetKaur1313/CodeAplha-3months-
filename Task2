@@ -1,110 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f9f9f9;
-      padding: 20px;
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #333;
-    }
-    input[type="text"] {
-      width: calc(100% - 50px);
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 20px 0;
-    }
-    li {
-      background: #f4f4f4;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    li span {
-      flex: 1;
-      text-align: left;
-    }
-    li button {
-      background-color: #ff4d4d;
-    }
-    li button:hover {
-      background-color: #cc0000;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .player { width: 350px; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        .controls button { margin: 5px; padding: 10px; cursor: pointer; }
+        input[type="file"] { margin-top: 10px; }
+        #playlist { list-style: none; padding: 0; }
+        #playlist li { padding: 10px; cursor: pointer; background: #f4f4f4; margin: 5px; border-radius: 5px; }
+        #playlist li:hover { background: #ddd; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>To-Do List</h1>
-    <div>
-      <input type="text" id="taskInput" placeholder="Enter a new task...">
-      <button onclick="addTask()">Add</button>
+
+    <h1>Web Music Player</h1>
+    
+    <div class="player">
+        <audio id="audioPlayer" controls></audio>
+        
+        <div class="controls">
+            <button onclick="prevTrack()">⏮</button>
+            <button onclick="playPause()">▶️/⏸</button>
+            <button onclick="nextTrack()">⏭</button>
+        </div>
+
+        <label>Volume: <input type="range" id="volume" min="0" max="1" step="0.1" value="1" onchange="changeVolume(this.value)"></label>
     </div>
-    <ul id="taskList"></ul>
-  </div>
 
-  <script>
-    function addTask() {
-      const taskInput = document.getElementById('taskInput');
-      const taskText = taskInput.value.trim();
+    <h2>Playlist</h2>
+    <ul id="playlist"></ul>
 
-      if (taskText === '') {
-        alert('Please enter a task.');
-        return;
-      }
+    <input type="file" id="fileInput" accept="audio/*" multiple>
+    
+    <script>
+        let audio = document.getElementById("audioPlayer");
+        let playlist = [];
+        let currentTrack = 0;
+        
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            let files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                let songURL = URL.createObjectURL(file);
+                
+                playlist.push({ title: file.name, url: songURL });
 
-      const taskList = document.getElementById('taskList');
+                let li = document.createElement("li");
+                li.textContent = file.name;
+                li.onclick = () => playTrack(playlist.indexOf(playlist.find(s => s.url === songURL)));
+                document.getElementById("playlist").appendChild(li);
+            }
+        });
 
-      // Create a new task item
-      const li = document.createElement('li');
-      const span = document.createElement('span');
-      span.textContent = taskText;
+        function playTrack(index) {
+            currentTrack = index;
+            audio.src = playlist[index].url;
+            audio.play();
+        }
 
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.onclick = function() {
-        taskList.removeChild(li);
-      };
+        function playPause() {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
 
-      li.appendChild(span);
-      li.appendChild(deleteButton);
-      taskList.appendChild(li);
+        function nextTrack() {
+            if (currentTrack < playlist.length - 1) {
+                playTrack(currentTrack + 1);
+            }
+        }
 
-      // Clear the input
-      taskInput.value = '';
-    }
-  </script>
+        function prevTrack() {
+            if (currentTrack > 0) {
+                playTrack(currentTrack - 1);
+            }
+        }
+
+        function changeVolume(value) {
+            audio.volume = value;
+        }
+    </script>
 </body>
 </html>
