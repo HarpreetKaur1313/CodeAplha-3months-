@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Book Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px gray;
+            margin-top: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+            width: calc(100% - 22px);
+        }
+        button {
+            background-color: blue;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .borrowed {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Personal Book Library</h2>
+
+    <!-- Add Book Form -->
+    <input type="text" id="title" placeholder="Book Title">
+    <input type="text" id="author" placeholder="Author">
+    <select id="category">
+        <option value="Fiction">Fiction</option>
+        <option value="Non-fiction">Non-fiction</option>
+        <option value="Science">Science</option>
+        <option value="History">History</option>
+    </select>
+    <button onclick="addBook()">Add Book</button>
+
+    <!-- Search Bar -->
+    <input type="text" id="search" placeholder="Search Books..." onkeyup="searchBooks()">
+
+    <!-- Book List -->
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="bookList"></tbody>
+    </table>
+</div>
+
+<script>
+    let books = [];
+
+    // Add a book to the library
+    function addBook() {
+        let title = document.getElementById("title").value;
+        let author = document.getElementById("author").value;
+        let category = document.getElementById("category").value;
+
+        if (title && author) {
+            books.push({ title, author, category, status: "Available" });
+            displayBooks();
+            clearFields();
+        } else {
+            alert("Please enter both title and author.");
+        }
+    }
+
+    // Clear input fields
+    function clearFields() {
+        document.getElementById("title").value = "";
+        document.getElementById("author").value = "";
+    }
+
+    // Display books
+    function displayBooks() {
+        let bookList = document.getElementById("bookList");
+        bookList.innerHTML = "";
+
+        books.forEach((book, index) => {
+            let row = bookList.insertRow();
+
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.category}</td>
+                <td class="${book.status === 'Borrowed' ? 'borrowed' : ''}">${book.status}</td>
+                <td>
+                    <button onclick="toggleBorrow(${index})">
+                        ${book.status === "Available" ? "Borrow" : "Return"}
+                    </button>
+                    <button onclick="removeBook(${index})" style="background-color:red;">Delete</button>
+                </td>
+            `;
+        });
+    }
+
+    // Toggle book borrowing status
+    function toggleBorrow(index) {
+        books[index].status = books[index].status === "Available" ? "Borrowed" : "Available";
+        displayBooks();
+    }
+
+    // Search books
+    function searchBooks() {
+        let query = document.getElementById("search").value.toLowerCase();
+        let bookList = document.getElementById("bookList");
+        bookList.innerHTML = "";
+
+        books
+            .filter(book => book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query))
+            .forEach((book, index) => {
+                let row = bookList.insertRow();
+
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.category}</td>
+                    <td class="${book.status === 'Borrowed' ? 'borrowed' : ''}">${book.status}</td>
+                    <td>
+                        <button onclick="toggleBorrow(${index})">
+                            ${book.status === "Available" ? "Borrow" : "Return"}
+                        </button>
+                        <button onclick="removeBook(${index})" style="background-color:red;">Delete</button>
+                    </td>
+                `;
+            });
+    }
+
+    // Remove a book from the library
+    function removeBook(index) {
+        books.splice(index, 1);
+        displayBooks();
+    }
+</script>
+
+</body>
+</html>
